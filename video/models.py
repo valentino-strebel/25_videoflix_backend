@@ -18,6 +18,7 @@ class Video(models.Model):
     thumbnail = models.ImageField(upload_to="thumbnails/")
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
+    video_file = models.FileField(upload_to='videos', blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
