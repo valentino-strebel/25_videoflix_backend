@@ -4,6 +4,10 @@ from django.db.models.signals import post_save,post_delete
 from django.core.files.storage import default_storage
 from core.tasks import convert720px
 import os
+from django_rq import enqueue
+import django_rq
+
+
 
 
 
@@ -14,6 +18,8 @@ def video_post_save(sender, instance, created, **kwargs):
     if created:
         print('New video created')
         convert720px(instance.video_file.path)
+        queue = django_rq.get_queue('default', autocommit=True)
+        queue.enqueue(convert720px, instance.video_file.path)
 
 @receiver(post_delete, sender=Video)
 def delete_related_file(sender, instance, **kwargs):

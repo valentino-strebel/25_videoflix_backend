@@ -43,8 +43,7 @@ INSTALLED_APPS = [
     "corsheaders",
    
     "authentication",
-    "video",
-    "content.apps.VideoConfig",
+    "video.apps.VideoConfig",
 ]
 
 MIDDLEWARE = [
@@ -82,15 +81,20 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", default="videoflix_db"),
-        "USER": os.environ.get("DB_USER", default="videoflix_user"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", default="supersecretpassword"),
-        "HOST": os.environ.get("DB_HOST", default="db"),
-        "PORT": os.environ.get("DB_PORT", default=5432)
+        "NAME": os.environ.get("DB_NAME", "videoflix_db"),
+        "USER": os.environ.get("DB_USER", "videoflix_user"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "supersecretpassword"),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),  
+        "PORT": str(os.environ.get("DB_PORT", "5432")),  
     }
 }
 
 # ---------- Cache / Redis ----------
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+REDIS_DB_CACHE = int(os.environ.get("REDIS_DB_CACHE", 1))
+REDIS_DB_RQ = int(os.environ.get("REDIS_DB_RQ", 0))
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",

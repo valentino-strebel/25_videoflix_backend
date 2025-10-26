@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-from . import signals
 
 
 class VideoConfig(AppConfig):
