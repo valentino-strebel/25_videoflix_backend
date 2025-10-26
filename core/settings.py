@@ -5,6 +5,11 @@ Django settings for core project.
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,7 +18,8 @@ def _split_env(name, default=""):
     return [x for x in config(name, default=default).split(",") if x]
 
 # ---------- Core ----------
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-@#x5h3zj!g+8g1v@2^b6^9$8&f1r7g$@t3v!p4#=g0r5qzj4m3')
+
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = _split_env("ALLOWED_HOSTS")          # e.g. "localhost,127.0.0.1"
