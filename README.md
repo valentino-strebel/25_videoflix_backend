@@ -1,6 +1,8 @@
 Clone the repository
 
-<pre> ```bash git clone https://github.com/valentino-strebel/25_videoflix_backend cd 25_videoflix_backend/core ``` </pre>
+```
+bash git clone https://github.com/valentino-strebel/25_videoflix_backend cd 25_videoflix_backend/core
+```
 
 Create and activate a virtual environment
 
