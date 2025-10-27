@@ -81,11 +81,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "videoflix_db"),
-        "USER": os.environ.get("DB_USER", "videoflix_user"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "supersecretpassword"),
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),  
-        "PORT": str(os.environ.get("DB_PORT", "5432")),  
+        "NAME": os.environ.get("DB_NAME", default="videoflix_db"),
+        "USER": os.environ.get("DB_USER", default="videoflix_user"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", default="supersecretpassword"),
+        "HOST": os.environ.get("DB_HOST", default="db"),
+        "PORT": os.environ.get("DB_PORT", default=5432) 
     }
 }
 
