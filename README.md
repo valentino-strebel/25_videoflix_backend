@@ -6,7 +6,13 @@ bash git clone https://github.com/valentino-strebel/25_videoflix_backend cd 25_v
 
 Create and activate a virtual environment
 
-<pre> ```bash # On Linux/Mac python -m venv venv source venv/bin/activate # (optional) upgrade pip python -m pip install --upgrade pip ``` </pre> <pre> ```bash # On Windows (PowerShell) python -m venv venv venv\Scripts\Activate python -m pip install --upgrade pip ``` </pre>
+```
+bash # On Linux/Mac python -m venv venv source venv/bin/activate # (optional) upgrade pip python -m pip install --upgrade pip
+```
+
+```
+bash # On Windows (PowerShell) python -m venv venv venv\Scripts\Activate python -m pip install --upgrade pip
+```
 
 Install dependencies
 
