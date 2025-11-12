@@ -22,24 +22,27 @@ from .utils import send_activation_email, send_password_reset_email
 User = get_user_model()
 
 
-# Helpers for cookies (HttpOnly)
-def _set_jwt_cookies(response, refresh: RefreshToken, *, secure=False):
+def _set_jwt_cookies(response, refresh: RefreshToken, *, secure=None):
+    if secure is None:
+        from django.conf import settings
+        secure = not settings.DEBUG
+
     access = str(refresh.access_token)
     response.set_cookie(
         "access_token",
         access,
         httponly=True,
         secure=secure,
-        samesite="Lax",
-        max_age=60 * 60,  # 1h
+        samesite="None",         
+        max_age=60 * 60,         
     )
     response.set_cookie(
         "refresh_token",
         str(refresh),
         httponly=True,
         secure=secure,
-        samesite="Lax",
-        max_age=60 * 60 * 24 * 7,  # 7d
+        samesite="None",         
+        max_age=60 * 60 * 24 * 7, 
     )
 
 
@@ -135,13 +138,12 @@ class TokenRefreshView(APIView):
             return Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
 
         response = Response({"detail": "Token refreshed", "access": access}, status=status.HTTP_200_OK)
-        # set new access cookie
         response.set_cookie(
             "access_token",
             access,
             httponly=True,
-            secure=request.is_secure(),
-            samesite="Lax",
+            secure=(not settings.DEBUG),
+            samesite="None",
             max_age=60 * 60,
         )
         return response
