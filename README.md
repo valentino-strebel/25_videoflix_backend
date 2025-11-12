@@ -1,171 +1,232 @@
-Clone the repository
+Videoflix (Django + Docker)
 
-bash git clone https://github.com/valentino-strebel/25_videoflix_backend
-cd 25_videoflix_backend
+A Django REST API for video streaming with JWT auth, Redis caching/queues, and HLS/FFmpeg support.
 
-Run with Docker (recommended)
+Stack
 
-Create a Dockerfile in the project root
+Python 3.12 (Alpine)
 
-FROM python:3.12-slim
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev netcat-openbsd && rm -rf /var/lib/apt/lists/\*
-WORKDIR /app
-COPY requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
-COPY . /app
-WORKDIR /app/core
-EXPOSE 8000
+Django (4.2–5.x)
 
-Create a docker-compose.yml file in the project root
+DRF + SimpleJWT
 
-version: "3.9"
-services:
-web:
-build: .
-command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-ports:
+PostgreSQL
 
-- "8000:8000"
-  env_file:
-- ./core/.env
-  volumes:
-- .:/app
-- media_data:/app/core/media
-- static_data:/app/core/static
-  depends_on:
-- db
-- redis
+Redis (cache + RQ worker)
 
-worker:
-build: .
-command: python manage.py rqworker default
-env_file:
+Gunicorn + WhiteNoise
 
-- ./core/.env
-  volumes:
-- .:/app
-  depends_on:
-- db
-- redis
+FFmpeg (for video processing)
 
-db:
-image: postgres:16
-environment:
-POSTGRES_DB: ${DB_NAME:-videoflix}
-POSTGRES_USER: ${DB_USER:-videoflix_user}
-POSTGRES_PASSWORD: ${DB_PASSWORD:-supersecretpassword}
-volumes:
+django-redis, django-rq, python-decouple, python-dotenv, Pillow
 
-- pg_data:/var/lib/postgresql/data
-  ports:
-- "5432:5432"
+Services & Ports
 
-redis:
-image: redis:7
-ports:
+web (Django API + Gunicorn): http://localhost:8000
 
-- "6379:6379"
+Admin: /admin
 
-volumes:
-pg_data:
-media_data:
-static_data:
+RQ dashboard: /django-rq/
 
-Create a .env file in the core directory
+API namespaces: /api/ (apps: authentication, video)
 
-cp core/.env.template.docker core/.env
+db (Postgres): container port 5432 (internal)
 
-Build and start the containers
+redis: container port 6379 (internal)
 
-docker compose build
-docker compose up
+Quick Start (Docker)
 
-This will start the following services:
-web: Django server (port 8000)
-db: PostgreSQL database (port 5432)
-redis: Redis cache (port 6379)
-worker: Background RQ worker
+# 1) Copy env file and fill values
 
-Access the project
+cp .env.example .env
 
-App: http://127.0.0.1:8000/
+# 2) Build & start
 
-Admin: http://127.0.0.1:8000/admin/
+docker compose up -d --build
 
-Create a superuser
+# 3) First run: entrypoint will
 
-docker compose exec web python manage.py createsuperuser
+# - wait for Postgres
 
-To stop the containers
+# - collect static files
+
+# - makemigrations + migrate
+
+# - create superuser from env:
+
+# DJANGO_SUPERUSER_USERNAME / DJANGO_SUPERUSER_EMAIL / DJANGO_SUPERUSER_PASSWORD
+
+#
+
+# 4) Visit the app
+
+# API: http://localhost:8000/
+
+# Admin: http://localhost:8000/admin
+
+# RQ: http://localhost:8000/django-rq/
+
+Data persists via Docker volumes: postgres_data, redis_data, videoflix_media, videoflix_static.
+
+Development Workflow
+
+Hot-reload is enabled via --reload in Gunicorn and a bind-mount of your source tree:
+
+# view logs
+
+docker compose logs -f web
+
+# open a Django shell
+
+docker compose exec web python manage.py shell
+
+# run migrations manually (if needed)
+
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py migrate
+
+# collect static (dev rarely needs it; prod does)
+
+docker compose exec web python manage.py collectstatic --noinput
+
+Redis / RQ
+
+An RQ worker is launched by the entrypoint:
+
+# see worker logs
+
+docker compose logs -f web | grep rqworker
+
+RQ admin is available at /django-rq/.
+
+Environment Variables
+
+These are read via python-decouple / dotenv and used in core/settings.py.
+
+Variable Default (dev) Required Notes
+SECRET_KEY generated/dev key Yes Strong, unique in prod
+DEBUG True No Set False in prod
+ALLOWED_HOSTS localhost,127.0.0.1 Yes Comma-separated
+CSRF_TRUSTED_ORIGINS http://localhost:5500,http://127.0.0.1:5500 No Comma-separated full origins
+DB_NAME — Yes Postgres database
+DB_USER — Yes Postgres user
+DB_PASSWORD — Yes Postgres password
+DB_HOST db Yes Compose service name
+DB_PORT 5432 Yes
+REDIS_HOST redis No Hostname
+REDIS_PORT 6379 No Port
+REDIS_DB 0 No RQ queue DB
+REDIS_LOCATION redis://redis:6379/1 No Cache URL (django-redis)
+EMAIL_BACKEND console backend No SMTP backend in prod
+EMAIL_HOST / EMAIL_PORT / EMAIL_USE_TLS / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD — No SMTP settings
+DEFAULT_FROM_EMAIL no-reply@videoflix.local No Sender address
+FRONTEND_URL http://localhost:3000 No For links in emails
+EMAIL_VERIFICATION_PATH /verify-email No
+PASSWORD_RESET_PATH /reset-password No
+LOG_LEVEL INFO No Logging
+DJANGO_SUPERUSER_USERNAME / DJANGO_SUPERUSER_EMAIL / DJANGO_SUPERUSER_PASSWORD — Yes (first run) Used by entrypoint to auto-create superuser
+VIDEO_ALLOWED_RESOLUTIONS 120p,360p,720p,1080p No HLS rendition list
+
+A sample .env.example is included—rename to .env and update secrets.
+
+Project Structure (relevant bits)
+.
+├── backend.Dockerfile
+├── backend.entrypoint.sh
+├── docker-compose.yml
+├── requirements.txt
+├── .env.example
+├── manage.py
+├── core/
+│ ├── settings.py
+│ ├── urls.py
+│ ├── asgi.py
+│ └── wsgi.py
+├── authentication/ # custom user model
+├── video/ # video/HLS logic
+└── media/ # persisted via volume
+
+API & Auth
+
+DRF installed; default permission is AllowAny (views can override).
+
+JWT via rest_framework_simplejwt:
+
+Access: 1 hour
+
+Refresh: 7 days
+
+Header: Authorization: Bearer <token>
+
+Custom user model: authentication.User (set via AUTH_USER_MODEL).
+
+Static & Media
+
+Static served by WhiteNoise in the web container.
+
+STATIC_ROOT=/app/static and MEDIA_ROOT=/app/media are mapped to named volumes.
+
+On container start, collectstatic runs automatically.
+
+Video / HLS
+
+FFmpeg is installed in the image.
+
+HLS root: <MEDIA_ROOT>/hls/<movie_id>/<resolution>/...
+
+Allowed resolutions configurable via VIDEO_ALLOWED_RESOLUTIONS.
+
+Example helper function (in settings context) shows 720p conversion with FFmpeg.
+
+Production Notes
+
+Set DEBUG=False, proper ALLOWED_HOSTS, strong SECRET_KEY.
+
+Consider moving RQ worker to a separate container instead of backgrounding it in the web process.
+
+Remove --reload from Gunicorn in production:
+
+exec gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60
+
+Configure reverse proxy (e.g., Nginx) for TLS and static caching, or use a platform’s ingress.
+
+Set SECURE_SSL_REDIRECT, SESSION_COOKIE_SECURE, CSRF_COOKIE_SECURE to True behind TLS.
+
+Use managed Postgres/Redis or persist volumes to durable storage.
+
+Run regular DB backups and add health checks.
+
+Common Commands
+
+# bring everything down (keep volumes/data)
 
 docker compose down
 
-To stop and remove all data volumes
+# bring everything down and wipe data/volumes
 
 docker compose down -v
 
-Manual setup (without Docker)
+# rebuild after requirements change
 
-Clone the repository
+docker compose build --no-cache
 
-bash git clone https://github.com/valentino-strebel/25_videoflix_backend
-cd 25_videoflix_backend/core
+# open a shell inside the web container
 
-Create and activate a virtual environment
+docker compose exec web /bin/sh
 
-bash # On Linux/Mac python -m venv venv source venv/bin/activate # (optional) upgrade pip python -m pip install --upgrade pip
+Troubleshooting
 
-bash # On Windows (PowerShell) python -m venv venv venv\Scripts\Activate python -m pip install --upgrade pip
+“relation does not exist” / migration errors
+Run makemigrations and migrate inside web, or wipe volumes and rebuild for a clean slate.
 
-Install dependencies
+Admin user not created
+Ensure all DJANGO*SUPERUSER*\* vars are set and that the first run wasn’t skipped (remove volumes and restart if needed).
 
-bash pip install -r requirements.txt
+Static files missing
+Check collectstatic output in logs; verify videoflix_static volume is attached.
 
-Create your .env file
+CORS errors from frontend
+Add your frontend origin(s) to CORS_ALLOWED_ORIGINS and, if needed, to CSRF_TRUSTED_ORIGINS.
 
-The project reads environment variables from core/.env (same folder as manage.py).
-
-bash cp .env.template .env
-
-Generate a secret key and set SECRET_KEY in .env
-
-bash python - <<'PY' import secrets; print(secrets.token_urlsafe(64)) PY
-
-PostgreSQL Database Setup
-
-Make sure PostgreSQL is installed and running on your system.
-
-Open PowerShell and log in as the default PostgreSQL user
-
-bash psql -U postgres
-
-Inside the PostgreSQL shell, create a new database and user
-
-sql CREATE DATABASE videoflix; CREATE USER videoflix_user WITH PASSWORD 'yourpassword'; GRANT ALL PRIVILEGES ON DATABASE videoflix TO videoflix_user; ALTER DATABASE videoflix OWNER TO videoflix_user; \q
-
-Configure your .env for PostgreSQL
-
-DEBUG=True SECRET_KEY=your_generated_secret_key DB_NAME=videoflix DB_USER=videoflix_user DB_PASSWORD=yourpassword DB_HOST=127.0.0.1 DB_PORT=5432
-
-Make sure PostgreSQL is running before continuing.
-
-Apply database migrations
-
-bash python manage.py migrate
-
-Create a superuser (for admin access)
-
-bash python manage.py createsuperuser
-
-Run the development server
-
-bash python manage.py runserver
-
-The server starts at http://127.0.0.1:8000/
-
-Access the project
-
-App: http://127.0.0.1:8000/
-
-Admin: http://127.0.0.1:8000/admin/
+Port already in use
+Change the host port in docker-compose.yml (e.g., "8001:8000").
