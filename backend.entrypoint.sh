@@ -20,22 +20,31 @@ python manage.py migrate
 
 # Create a superuser using environment variables
 # (Dein Superuser-Erstellungs-Code bleibt gleich)
-python manage.py shell <<EOF
+python manage.py shell <<'EOF'
 import os
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
-email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
+
+# pull identifiers from env; prefer email if USERNAME_FIELD is 'email'
+identifier = os.environ.get('DJANGO_SUPERUSER_EMAIL') or os.environ.get('DJANGO_SUPERUSER_USERNAME')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'adminpassword')
 
-if not User.objects.filter(username=username).exists():
-    print(f"Creating superuser '{username}'...")
-    # Korrekter Aufruf: username hier übergeben
-    User.objects.create_superuser(username=username, email=email, password=password)
-    print(f"Superuser '{username}' created.")
+# build a lookup using the actual USERNAME_FIELD
+lookup = {User.USERNAME_FIELD: identifier}
+
+if not User.objects.filter(**lookup).exists():
+    print(f"Creating superuser with {User.USERNAME_FIELD}='{identifier}'...")
+    # create kwargs that match your manager signature
+    create_kwargs = {User.USERNAME_FIELD: identifier, 'password': password}
+    # include email if the model has it and it's not already the USERNAME_FIELD
+    if 'email' in [f.name for f in User._meta.get_fields()] and User.USERNAME_FIELD != 'email' and email:
+        create_kwargs['email'] = email
+    User.objects.create_superuser(**create_kwargs)
+    print("Superuser created.")
 else:
-    print(f"Superuser '{username}' already exists.")
+    print("Superuser already exists.")
 EOF
 
 python manage.py rqworker default &
