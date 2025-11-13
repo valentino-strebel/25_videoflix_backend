@@ -22,4 +22,7 @@ class CookieJWTAuthentication(BaseAuthentication):
         return (user, None)
 
 
-AuthenticatedOnly = [CookieJWTAuthentication], [IsAuthenticated]
+AuthenticatedOnly = {
+    "authentication_classes": [CookieJWTAuthentication],
+    "permission_classes": [IsAuthenticated],
+}

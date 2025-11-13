@@ -14,8 +14,7 @@ import django_rq
 @receiver(post_save, sender=Video)
 
 def video_post_save(sender, instance, created, **kwargs):
-    print('tesxt')
-    if created:
+    if created and instance.video_file:
         print('New video created')
         convert720px(instance.video_file.path)
         queue = django_rq.get_queue('default', autocommit=True)
