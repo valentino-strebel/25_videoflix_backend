@@ -30,7 +30,11 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         email = attrs.get("email")
         password = attrs.get("password")
-        user = authenticate(request=self.context.get("request"), email=email, password=password)
+        user = authenticate(
+            request=self.context.get("request"),
+            username=email,
+            password=password,
+        )
         if not user:
             raise serializers.ValidationError("Please check your input and try again.")
         if not user.is_active:

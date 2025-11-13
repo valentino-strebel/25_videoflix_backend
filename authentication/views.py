@@ -24,28 +24,35 @@ from .utils import send_activation_email, send_password_reset_email
 User = get_user_model()
 
 
+from django.conf import settings
+
 def _set_jwt_cookies(response, refresh: RefreshToken, *, secure=None):
     if secure is None:
-        from django.conf import settings
         secure = not settings.DEBUG
 
     access = str(refresh.access_token)
+
+    samesite_value = "None"
+    if settings.DEBUG and not secure:
+        samesite_value = "Lax"
+
     response.set_cookie(
         "access_token",
         access,
         httponly=True,
         secure=secure,
-        samesite="None",         
-        max_age=60 * 60,         
+        samesite=samesite_value,
+        max_age=60 * 60,
     )
     response.set_cookie(
         "refresh_token",
         str(refresh),
         httponly=True,
         secure=secure,
-        samesite="None",         
-        max_age=60 * 60 * 24 * 7, 
+        samesite=samesite_value,
+        max_age=60 * 60 * 24 * 7,
     )
+
 
 
 def _clear_jwt_cookies(response):

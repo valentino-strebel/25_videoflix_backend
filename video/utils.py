@@ -4,7 +4,7 @@ from django.http import FileResponse, Http404, HttpResponse
 
 
 def allowed_resolutions():
-    raw = getattr(settings, "VIDEO_ALLOWED_RESOLUTIONS", ["120p", "360p", "720p", "1080p"])
+    raw = getattr(settings, "VIDEO_ALLOWED_RESOLUTIONS", ["120p", "480p", "360p", "720p", "1080p"])
     return raw if isinstance(raw, (list, tuple)) else [s.strip() for s in str(raw).split(",") if s.strip()]
 
 
