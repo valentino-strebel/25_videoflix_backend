@@ -6,11 +6,13 @@ from rest_framework.authentication import BaseAuthentication
 from .serializers import VideoListSerializer
 from .models import Video
 from .permissions import CookieJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
 from .utils import serve_m3u8, serve_segment
 
 
 class VideoListView(APIView):
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [CookieJWTAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -20,7 +22,7 @@ class VideoListView(APIView):
 
 
 class HLSManifestView(APIView):
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [CookieJWTAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, movie_id: int, resolution: str):
@@ -28,7 +30,7 @@ class HLSManifestView(APIView):
 
 
 class HLSSegmentView(APIView):
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [CookieJWTAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, movie_id: int, resolution: str, segment: str):

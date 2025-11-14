@@ -46,6 +46,14 @@ This will:
 - Collect static files
 - Create a superuser (using DJANGO*SUPERUSER*\* variables)
 
+## Email verification
+
+After the Docker Container is running, run to read out logs:
+
+```bash
+docker compose logs -f web
+```
+
 ## Troubleshooting: Backend Container Instantly Exits (“exited with code 1 / 2 / 255”)
 
 If your videoflix_backend container starts and immediately stops, and you see errors like:
