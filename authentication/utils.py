@@ -1,3 +1,5 @@
+# authentication/utils.py
+
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
@@ -30,11 +32,23 @@ def send_activation_email(user):
     link, _, _ = build_activation_link(user)
     subject = "Activate your Videoflix account"
     message = f"Click the link to activate your account: {link}"
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=settings.DEBUG,
+    )
 
 
 def send_password_reset_email(user):
     link, _, _ = build_password_reset_link(user)
     subject = "Reset your Videoflix password"
     message = f"Click the link to reset your password: {link}"
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=settings.DEBUG,
+    )

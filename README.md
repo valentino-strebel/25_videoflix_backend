@@ -97,14 +97,17 @@ This happens especially when cloning the repository on Windows with git or editi
 
 ```bash
 docker compose down
-docker compose up --build
+docker compose build --no-cache
+docker compose up
+
 ```
 
 ## 4. Access the App
 
-- API: http://localhost:8000/
-- Admin: http://localhost:8000/admin/
-- RQ dashboard: http://localhost:8000/django-rq/
+- API: http://127.0.0.1:8000
+- Admin: http://127.0.0.1:8000/admin
+- RQ dashboard: http://127.0.0.1:8000/django-rq
+- Frontend: http://127.0.0.1:5500
 
 ## Useful Commands
 

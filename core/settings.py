@@ -8,12 +8,14 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 def _split_env(name, default=""):
     return [x.strip() for x in config(name, default=default).split(",") if x.strip()]
 
+
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default")
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = _split_env("ALLOWED_HOSTS", default="localhost,127.0.0.1,[::1]")
+ALLOWED_HOSTS = _split_env("ALLOWED_HOSTS", default="127.0.0.1")
 
 AUTH_USER_MODEL = "authentication.User"
 
@@ -82,7 +84,10 @@ REDIS_DB_RQ = int(os.environ.get("REDIS_DB_RQ", 0))
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("REDIS_LOCATION", f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_CACHE}"),
+        "LOCATION": os.environ.get(
+            "REDIS_LOCATION",
+            f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_CACHE}",
+        ),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": "videoflix",
     }
@@ -98,6 +103,7 @@ RQ_QUEUES = {
     },
 }
 
+# E-Mail: Multi-Backend (Konsole + SMTP)
 EMAIL_BACKEND = "core.email_backends.MultiEmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
@@ -105,17 +111,28 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=False, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER or "no-reply@videoflix.local")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default=EMAIL_HOST_USER or "no-reply@videoflix.local",
+)
 
-FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+# Frontend läuft auf 127.0.0.1:5500
+FRONTEND_URL = config("FRONTEND_URL", default="http://127.0.0.1:5500")
 EMAIL_VERIFICATION_PATH = config("EMAIL_VERIFICATION_PATH", default="/verify-email")
 PASSWORD_RESET_PATH = config("PASSWORD_RESET_PATH", default="/reset-password")
 
-CORS_ALLOWED_ORIGINS = _split_env("CORS_ALLOWED_ORIGINS", default="")
+CORS_ALLOWED_ORIGINS = _split_env(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://127.0.0.1:5500",
+)
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ["X-Debug-Activation-Backend"]
 
-CSRF_TRUSTED_ORIGINS = _split_env("CSRF_TRUSTED_ORIGINS", default="")
+CSRF_TRUSTED_ORIGINS = _split_env(
+    "CSRF_TRUSTED_ORIGINS",
+    default="http://127.0.0.1:5500",
+)
 
 SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=not DEBUG, cast=bool)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=not DEBUG, cast=bool)
@@ -152,7 +169,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 HLS_ROOT = str(MEDIA_ROOT / "hls")
-VIDEO_ALLOWED_RESOLUTIONS = _split_env("VIDEO_ALLOWED_RESOLUTIONS", default="120p,360p,720p,1080p")
+VIDEO_ALLOWED_RESOLUTIONS = _split_env(
+    "VIDEO_ALLOWED_RESOLUTIONS",
+    default="120p,360p,720p,1080p",
+)
 
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 
@@ -163,7 +183,9 @@ LOGGING = {
         "verbose": {"format": "[{levelname}] {asctime} {name}: {message}", "style": "{"},
         "simple": {"format": "[{levelname}] {message}", "style": "{"},
     },
-    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "simple"}
+    },
     "root": {"handlers": ["console"], "level": LOG_LEVEL},
 }
 
