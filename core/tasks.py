@@ -1,7 +1,8 @@
 import os
 import subprocess
-from pathlib import Path
-from django.conf import settings
+from django_rq import job
+from authentication.utils import send_activation_email
+from authentication.models import User
 
 from video.utils import hls_root
 
@@ -52,3 +53,8 @@ def convert_to_hls_480p(movie_id: int, input_path: str) -> str:
 
     subprocess.run(cmd, check=True)
     return str(playlist_path)
+
+@job
+def send_activation_email_async(user_id: int) -> None:
+    user = User.objects.get(pk=user_id)
+    send_activation_email(user)

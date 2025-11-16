@@ -1,0 +1,7 @@
+Hello {{ user.email }},
+Thank you for registering with Videflix. To complete your registration and verify your email address,
+please click the link below:
+{{ activation_link }}
+If you didn't create this account, you can ignore this email.
+Best regards,
+Your Videoflix Team

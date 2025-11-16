@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="../styles/style.css" />
+
+<html>
+  <body>
+    <p>Hello {{ user.email }},</p>
+    <p>
+      Thank you for registering with Videflix. To complete your registration and verify your email address,
+      please click the link below:
+    </p>
+    <p>
+      <a href="{{ activation_link }}"> Activate your account </a>
+    </p>
+    <p>If you didn't create this account, you can ignore this email.</p>
+    <p>Best regards,</p>
+    <p>Your Videoflix Team</p>
+  </body>
+</html>
