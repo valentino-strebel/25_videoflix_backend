@@ -5,22 +5,19 @@ It runs fully in Docker using PostgreSQL, Redis, and Gunicorn.
 
 Quick Start
 
-## 1. Clone the Repository
+# Requirements
+
+- Docker
+- Docker Compose
+
+# 1. Clone the Repository
 
 ```bash
 git clone https://github.com/valentino-strebel/25_videoflix_backend
-cd core
+cd 25_videoflix_backend
 ```
 
-## Install required dependencies
-
-Run this command to install the project’s required Python dependencies.
-
-```bash
-pip install -r requirements.txt
-```
-
-## 2. Create Your Environment File
+# 2. Create Your Environment File
 
 Copy the example and fill in your own values:
 
