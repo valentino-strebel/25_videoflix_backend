@@ -25,6 +25,16 @@ Copy the example and fill in your own values:
 cp .env.template .env
 ```
 
+Configure your email settings to activate verification email sending:
+
+- EMAIL_HOST=smtp.example.com
+- EMAIL_PORT=587
+- EMAIL_HOST_USER=dev@example.com
+- EMAIL_HOST_PASSWORD=your-password
+- EMAIL_USE_TLS=True
+- EMAIL_USE_SSL=False
+- DEFAULT_FROM_EMAIL=dev@example.com
+
 ## Docker Desktop
 
 Start Docker Desktop before proceeding with the next steps.

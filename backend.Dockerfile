@@ -20,4 +20,4 @@ RUN sed -i 's/\r$//' backend.entrypoint.sh && \
 
 EXPOSE 8000
 
-ENTRYPOINT [ "sh", "./backend.entrypoint.sh" ]
+ENTRYPOINT [ "bash", "-c", "sed -i 's/\r$//' backend.entrypoint.sh && bash backend.entrypoint.sh" ]

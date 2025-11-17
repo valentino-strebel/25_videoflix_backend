@@ -10,22 +10,19 @@ from authentication.models import User
 from video.utils import hls_root
 
 
-# -------------------------------------------------------------------
-# Resolution configuration
-# -------------------------------------------------------------------
-
 # Read from Django settings, which can be backed by the env var:
 # VIDEO_ALLOWED_RESOLUTIONS=120p,480p,360p,720p,1080p
+# In settings.py this is already turned into a list via _split_env.
 _VIDEO_ALLOWED_RESOLUTIONS = getattr(
     settings,
     "VIDEO_ALLOWED_RESOLUTIONS",
-    "480p,720p",
+    ["480p", "720p"],  # default as list, not string
 )
 
 ALLOWED_RESOLUTIONS = {
-    res.strip().lower()
-    for res in _VIDEO_ALLOWED_RESOLUTIONS.split(",")
-    if res.strip()
+    str(res).strip().lower()
+    for res in _VIDEO_ALLOWED_RESOLUTIONS
+    if str(res).strip()
 }
 
 # Map resolution labels to heights
