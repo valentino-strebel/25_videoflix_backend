@@ -102,6 +102,14 @@ docker compose up
 
 ```
 
+If that fails too, hard reset with:
+
+```bash
+docker compose down -v
+docker compose build --no-cache
+docker compose up
+```
+
 ## 4. Access the App
 
 - API: http://127.0.0.1:8000

@@ -41,7 +41,7 @@ def _send_templated_email(subject, to_email, template_base_name, context):
         to=[to_email],
     )
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=settings.DEBUG)
+    msg.send(fail_silently=False)
 
 def send_activation_email(user):
     link, uidb64, token = build_activation_link(user)

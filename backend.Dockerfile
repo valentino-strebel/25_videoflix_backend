@@ -8,7 +8,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN apk update && \
+RUN sed -i 's/\r$//' backend.entrypoint.sh && \
+    apk update && \
     apk add --no-cache --upgrade bash && \
     apk add --no-cache postgresql-client ffmpeg && \
     apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
