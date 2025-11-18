@@ -1,18 +1,67 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="../styles/style.css" />
-
 <html>
-  <body>
-    <p>Hello {{ user.email }},</p>
-    <p>
-      Thank you for registering with Videflix. To complete your registration and verify your email address,
-      please click the link below:
-    </p>
-    <p>
-      <a href="{{ activation_link }}"> Activate your account </a>
-    </p>
-    <p>If you didn't create this account, you can ignore this email.</p>
-    <p>Best regards,</p>
-    <p>Your Videoflix Team</p>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #222222;
+    ">
+    <table
+      width="100%"
+      border="0"
+      cellspacing="0"
+      cellpadding="0"
+      style="background-color: #f5f5f5; padding: 20px 0">
+      <tr>
+        <td align="center">
+          <table
+            width="600"
+            border="0"
+            cellspacing="0"
+            cellpadding="0"
+            style="background-color: #ffffff; padding: 20px; border-radius: 8px">
+            <tr>
+              <td>
+                <p style="margin: 0 0 16px 0">Hello {{ user.email }},</p>
+
+                <p style="margin: 0 0 16px 0">
+                  Thank you for registering with Videflix. To complete your registration and verify your email
+                  address, please click the button below:
+                </p>
+
+                <p style="margin: 0 0 24px 0">
+                  <a
+                    href="{{ activation_link }}"
+                    style="
+                      display: inline-block;
+                      width: 200px;
+                      padding: 10px 0;
+                      background-color: #0066ff;
+                      border-radius: 16px;
+                      color: #ffffff !important;
+                      text-align: center;
+                      text-decoration: none;
+                      font-weight: bold;
+                      font-family: Helvetica, Arial, sans-serif;
+                    ">
+                    Activate your account
+                  </a>
+                </p>
+
+                <p style="margin: 0 0 12px 0">
+                  If you didn't create this account, you can ignore this email.
+                </p>
+
+                <p style="margin: 0 0 4px 0">Best regards,</p>
+                <p style="margin: 0">Your Videoflix Team</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
