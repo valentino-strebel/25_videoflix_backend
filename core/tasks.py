@@ -10,13 +10,11 @@ from authentication.models import User
 from video.utils import hls_root
 
 
-# Read from Django settings, which can be backed by the env var:
-# VIDEO_ALLOWED_RESOLUTIONS=120p,480p,360p,720p,1080p
-# In settings.py this is already turned into a list via _split_env.
+
 _VIDEO_ALLOWED_RESOLUTIONS = getattr(
     settings,
     "VIDEO_ALLOWED_RESOLUTIONS",
-    ["480p", "720p"],  # default as list, not string
+    ["480p", "720p"],  
 )
 
 ALLOWED_RESOLUTIONS = {
@@ -25,7 +23,6 @@ ALLOWED_RESOLUTIONS = {
     if str(res).strip()
 }
 
-# Map resolution labels to heights
 RESOLUTION_HEIGHTS = {
     "120p": 120,
     "360p": 360,
@@ -89,7 +86,6 @@ def convert_to_mp4(input_path: str, resolution: str) -> str:
     return output_path
 
 
-# Backwards-compatible helper if you still want a 720p-specific wrapper
 def convert720px(input_path: str) -> str:
     """
     Legacy wrapper for 720p MP4 conversion.
@@ -111,7 +107,6 @@ def convert_to_hls(movie_id: int, input_path: str, resolution: str) -> str:
     height = get_resolution_height(resolution)
     resolution = resolution.lower()
 
-    # Base HLS folder: usually MEDIA_ROOT / "hls"
     base_dir: Path = hls_root()
     output_dir = base_dir / str(movie_id) / resolution
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -136,7 +131,6 @@ def convert_to_hls(movie_id: int, input_path: str, resolution: str) -> str:
     return str(playlist_path)
 
 
-# Backwards-compatible helper if you still want a 480p-specific wrapper
 def convert_to_hls_480p(movie_id: int, input_path: str) -> str:
     """
     Legacy wrapper for 480p HLS conversion.
