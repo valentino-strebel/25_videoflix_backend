@@ -1,3 +1,7 @@
+"""
+Utilities for video conversion (MP4 and HLS) and async email-related tasks.
+"""
+
 import os
 import subprocess
 from pathlib import Path
@@ -5,16 +9,15 @@ from pathlib import Path
 from django.conf import settings
 from django_rq import job
 
-from authentication.utils import send_activation_email
+from authentication.api.utils import send_activation_email
 from authentication.models import User
-from video.utils import hls_root
-
+from video.api.utils import hls_root
 
 
 _VIDEO_ALLOWED_RESOLUTIONS = getattr(
     settings,
     "VIDEO_ALLOWED_RESOLUTIONS",
-    ["480p", "720p"],  
+    ["480p", "720p"],
 )
 
 ALLOWED_RESOLUTIONS = {
@@ -35,7 +38,15 @@ RESOLUTION_HEIGHTS = {
 def get_resolution_height(resolution: str) -> int:
     """
     Validate the resolution string (e.g. "480p") and return its height.
-    Raises ValueError if the resolution is not allowed or unknown.
+
+    Args:
+        resolution (str): Resolution label including 'p' (e.g. "480p").
+
+    Returns:
+        int: The vertical height in pixels for the given resolution.
+
+    Raises:
+        ValueError: If the resolution is not allowed or unknown.
     """
     resolution = resolution.lower()
 
@@ -54,16 +65,26 @@ def get_resolution_height(resolution: str) -> int:
         ) from exc
 
 
-# -------------------------------------------------------------------
-# MP4 conversion
-# -------------------------------------------------------------------
-
 def convert_to_mp4(input_path: str, resolution: str) -> str:
     """
-    Convert the given video file to MP4 at the specified resolution,
-    using the naming pattern: <base>_<resolution>.mp4
+    Convert a video file to MP4 at the specified resolution.
 
-    Example: /path/video.mp4 + "480p" -> /path/video_480p.mp4
+    The output file name follows the pattern:
+        <base>_<resolution>.mp4
+
+    Example:
+        /path/video.mp4 + "480p" -> /path/video_480p.mp4
+
+    Args:
+        input_path (str): Path to the input video file.
+        resolution (str): Resolution label such as "480p" or "720p".
+
+    Returns:
+        str: Path to the converted MP4 file.
+
+    Raises:
+        ValueError: If the resolution is invalid.
+        CalledProcessError: If ffmpeg fails.
     """
     height = get_resolution_height(resolution)
 
@@ -72,9 +93,9 @@ def convert_to_mp4(input_path: str, resolution: str) -> str:
 
     cmd = [
         "ffmpeg",
-        "-y",                          # overwrite output
+        "-y",
         "-i", input_path,
-        "-vf", f"scale=-2:{height}",   # keep aspect ratio, set height
+        "-vf", f"scale=-2:{height}",
         "-c:v", "libx264",
         "-crf", "23",
         "-c:a", "aac",
@@ -88,21 +109,35 @@ def convert_to_mp4(input_path: str, resolution: str) -> str:
 
 def convert720px(input_path: str) -> str:
     """
-    Legacy wrapper for 720p MP4 conversion.
+    Legacy wrapper that converts a video to 720p MP4.
+
+    Args:
+        input_path (str): Path to the input video file.
+
+    Returns:
+        str: Path to the converted 720p MP4 file.
     """
     return convert_to_mp4(input_path, "720p")
 
 
-# -------------------------------------------------------------------
-# HLS conversion
-# -------------------------------------------------------------------
-
 def convert_to_hls(movie_id: int, input_path: str, resolution: str) -> str:
     """
-    Convert the given video to HLS at the specified resolution and store it under:
+    Convert a video file to HLS at the specified resolution.
+
+    The output is stored under:
         <HLS_ROOT>/<movie_id>/<resolution>/
 
-    Returns the path to the generated index.m3u8.
+    Args:
+        movie_id (int): Identifier used to build the output directory path.
+        input_path (str): Path to the input video file.
+        resolution (str): Resolution label such as "480p" or "720p".
+
+    Returns:
+        str: Path to the generated HLS playlist (index.m3u8).
+
+    Raises:
+        ValueError: If the resolution is invalid.
+        CalledProcessError: If ffmpeg fails.
     """
     height = get_resolution_height(resolution)
     resolution = resolution.lower()
@@ -133,16 +168,25 @@ def convert_to_hls(movie_id: int, input_path: str, resolution: str) -> str:
 
 def convert_to_hls_480p(movie_id: int, input_path: str) -> str:
     """
-    Legacy wrapper for 480p HLS conversion.
+    Legacy wrapper that converts a video to 480p HLS.
+
+    Args:
+        movie_id (int): Identifier used to build the output directory path.
+        input_path (str): Path to the input video file.
+
+    Returns:
+        str: Path to the generated 480p HLS playlist (index.m3u8).
     """
     return convert_to_hls(movie_id, input_path, "480p")
 
 
-# -------------------------------------------------------------------
-# Async jobs
-# -------------------------------------------------------------------
-
 @job
 def send_activation_email_async(user_id: int) -> None:
+    """
+    Asynchronous task to send an activation email to a user.
+
+    Args:
+        user_id (int): Primary key of the user who should receive the email.
+    """
     user = User.objects.get(pk=user_id)
     send_activation_email(user)

@@ -1,7 +1,15 @@
+"""
+Token generators for account activation and password reset functionality.
+"""
+
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 class ActivationTokenGenerator(PasswordResetTokenGenerator):
+    """
+    Token generator used for email-based account activation.
+    Inherits all behavior from Django's PasswordResetTokenGenerator.
+    """
     pass
 
 

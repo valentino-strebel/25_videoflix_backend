@@ -1,3 +1,10 @@
+"""
+Django settings for the core project.
+
+Loads environment-based configuration for security, database, Redis, email,
+CORS, JWT authentication, static/media handling, and application behavior.
+"""
+
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -10,6 +17,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def _split_env(name, default=""):
+    """
+    Split a comma-separated environment variable into a cleaned list of values.
+
+    Args:
+        name (str): Environment variable key.
+        default (str): Fallback value if the variable is missing.
+
+    Returns:
+        list[str]: List of trimmed strings.
+    """
     return [x.strip() for x in config(name, default=default).split(",") if x.strip()]
 
 
@@ -103,7 +120,6 @@ RQ_QUEUES = {
     },
 }
 
-# E-Mail: Multi-Backend (Konsole + SMTP)
 EMAIL_BACKEND = "core.email_backends.MultiEmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
@@ -116,7 +132,6 @@ DEFAULT_FROM_EMAIL = config(
     default=EMAIL_HOST_USER or "no-reply@videoflix.local",
 )
 
-# Frontend läuft auf 127.0.0.1:5500
 FRONTEND_URL = config("FRONTEND_URL", default="http://127.0.0.1:5500")
 EMAIL_VERIFICATION_PATH = config("EMAIL_VERIFICATION_PATH", default="/verify-email")
 PASSWORD_RESET_PATH = config("PASSWORD_RESET_PATH", default="/reset-password")
@@ -169,6 +184,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 HLS_ROOT = str(MEDIA_ROOT / "hls")
+
 VIDEO_ALLOWED_RESOLUTIONS = _split_env(
     "VIDEO_ALLOWED_RESOLUTIONS",
     default="120p,360p,720p,1080p",
