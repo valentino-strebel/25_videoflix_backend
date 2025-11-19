@@ -63,7 +63,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "core.urls"
+ROOT_URLCONF = "core.api.urls"
 
 TEMPLATES = [
     {
@@ -120,7 +120,7 @@ RQ_QUEUES = {
     },
 }
 
-EMAIL_BACKEND = "core.email_backends.MultiEmailBackend"
+EMAIL_BACKEND = "core.api.email_backends.MultiEmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="localhost")
 EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)

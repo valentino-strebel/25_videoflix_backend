@@ -122,7 +122,7 @@ docker compose up
 - API: http://127.0.0.1:8000
 - Admin: http://127.0.0.1:8000/admin
 - RQ dashboard: http://127.0.0.1:8000/django-rq
-- Frontend: http://127.0.0.1:5500
+- Frontend: http://127.0.0.1:5501
 
 ## Useful Commands
 

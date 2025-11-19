@@ -14,14 +14,14 @@ urlpatterns = [
     path(
         "api/",
         include(
-            ("authentication.urls", "authentication"),
+            ("authentication.api.urls", "authentication"),
             namespace="authentication"
         ),
     ),
     path(
         "api/",
         include(
-            ("video.urls", "video"),
+            ("video.api.urls", "video"),
             namespace="video"
         ),
     ),
